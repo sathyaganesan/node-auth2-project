@@ -20,11 +20,22 @@ function findById(id) {
 }
 
 function findByUsername(username) {
+    console.log(username);
     return db("users")
         .select("users.id", "users.username as User", "users.password", "roles.role as Role")
         .where("users.username", username)
         .innerJoin("roles", "users.role_id", "roles.id")
 }
+
+// function findByUsername() {
+//     return db("users")
+//         .select( "username")
+// }
+
+// function findUser() {
+//     return db("users")
+//     .select("i")
+// }
 
 module.exports = {
     add,

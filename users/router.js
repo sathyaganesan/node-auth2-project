@@ -6,7 +6,7 @@ const { restrict } = require("./middleware");
 
 const router = express.Router();
 
-router.get("/users", restrict("admin"), async (req, res, next) => {
+router.get("/users", restrict(), async (req, res, next) => {
     try {
         res.json(await Users.find());
     } catch (err) {
@@ -36,13 +36,15 @@ router.post("/users", async (req, res, next) => {
 })
 
 router.post("/login", async (req, res, next) => {
+    console.log(req.body);
     try {
         const { username, password } = req.body
-        const user = await Users.findByUsername(username)
+        const [user] = await Users.findByUsername(username)
+        console.log(user);
 
         if (!user) {
             return res.status(401).json({
-                Message: "Invalid credentials",
+                Message: "Invalid User",
             })
         }
         //hash the password again and see if it matches what we have in the database
@@ -50,7 +52,7 @@ router.post("/login", async (req, res, next) => {
         
         if (!passwordValid) {
             return res.status(401).json({
-                Message: "Invalid Credentials",
+                Message: "Invalid password",
             })
         }
         //generate a new session for ths user,
@@ -59,12 +61,13 @@ router.post("/login", async (req, res, next) => {
 
         const token = jwt.sign({
             userId: user.id,
-        userRole: user.role,}, process.env.JWT_SECRET)
+            userRole: user.role,}, "keep it secret, keep it safe")
         // Instruct the client to save a new cookie with this token.
-        res.cookie("token", token);
+        // res.cookie("token", token);
         
         res.json({
             Message: `Welcome ${user.username}!`,
+            token: token
         })
     } catch (err) {
         next(err);
